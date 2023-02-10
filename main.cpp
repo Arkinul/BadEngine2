@@ -160,7 +160,7 @@ static void precomputeMoves(){
 }
 
 
-class chessBoard {
+struct chessBoard {
     bitset<64> whiteKing;
     bitset<64> whitePawns;
     bitset<64> whiteKnights;
@@ -179,7 +179,7 @@ class chessBoard {
 
 };
 
-class chessMove{
+struct chessMove{
     bitset<64> from;
     bitset<64> to;
     int specialty;
@@ -201,7 +201,52 @@ class chessPosition{
     int material;
 
     void generatePseudoLegalMoves(){
-        //TODO
+        bitset<64> King;
+        bitset<64> Pawns;
+        bitset<64> Knights;
+        bitset<64> Bishops;
+        bitset<64> Rooks;
+        bitset<64> Queens;
+        bitset<64> enemyPieces;
+        bitset<64> ownPieces;
+
+        if(whiteToMove){
+            King = board.whiteKing;
+            Pawns = board.whitePawns;
+            Knights = board.whiteKnights;
+            Bishops = board.whiteBishops;
+            Rooks = board.whiteRooks;
+            Queens = board.whiteQueens;
+            enemyPieces = board.blackPieces;
+            ownPieces = board.whitePieces;
+        }else{
+            King = board.blackKing;
+            Pawns = board.blackPawns;
+            Knights = board.blackKnights;
+            Bishops = board.blackBishops;
+            Rooks = board.blackRooks;
+            Queens = board.blackQueens;
+            enemyPieces = board.whitePieces;
+            ownPieces = board.blackPieces;
+        }
+        for(int i = 0;i<64;i++){
+            if(King[i]){
+                bitset<64> thisKingMoves = kingMoves[i] & ~ownPieces;
+                for(int j = 0;j<64;j++){
+                    if(thisKingMoves[j]){
+                        auto* newMove = new chessMove();
+                        newMove->from.set(i);
+                        newMove->to.set(j);
+                        newMove->specialty = 0;
+                        pseudoLegalMoves.push_back(newMove);
+                    }
+                }
+
+            }
+
+        }
+
+
     };
 
     void generateLegalMoves(){
