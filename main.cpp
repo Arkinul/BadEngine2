@@ -37,7 +37,7 @@ static const int queenValue = 900;
 static const vector<int> pieceValues = {0,0,pawnValue,knightValue,bishopValue,rookValue,queenValue,0,
                                         0,0,pawnValue,knightValue,bishopValue,rookValue,queenValue,0,
                                         0,0,-pawnValue,-knightValue,-bishopValue,-rookValue,-queenValue,0};
-
+//precompute squares to edge from each square
 static void precomputeMoveData(){
     for (char file = 0;file<8;file++){
         for(char rank = 0;rank<8;rank++){
@@ -52,6 +52,7 @@ static void precomputeMoveData(){
         }
     }
 }
+//precompute possible moves for each piece from each square
 static void precomputeMoves(){
     for (char file = 0;file<8;file++){
         for(char rank = 0;rank<8;rank++){
@@ -160,7 +161,7 @@ static void precomputeMoves(){
 }
 
 
-class chessBoard {
+struct chessBoard {
     bitset<64> whiteKing;
     bitset<64> whitePawns;
     bitset<64> whiteKnights;
@@ -179,7 +180,7 @@ class chessBoard {
 
 };
 
-class chessMove{
+struct chessMove{
     bitset<64> from;
     bitset<64> to;
     int specialty;
@@ -201,8 +202,59 @@ class chessPosition{
     int material;
 
     void generatePseudoLegalMoves(){
-        //TODO
+        bitset<64> ownPieces;
+        bitset<64> enemyPieces;
+        bitset<64> ownKing;
+        bitset<64> ownPawns;
+        bitset<64> ownKnights;
+        bitset<64> ownBishops;
+        bitset<64> ownRooks;
+        bitset<64> ownQueens;
+        if(whiteToMove){
+            ownPieces = board.whitePieces;
+            enemyPieces = board.blackPieces;
+            ownKing = board.whiteKing;
+            ownPawns = board.whitePawns;
+            ownKnights = board.whiteKnights;
+            ownBishops = board.whiteBishops;
+            ownRooks = board.whiteRooks;
+            ownQueens = board.whiteQueens;
+
+        }else{
+            ownPieces = board.blackPieces;
+            enemyPieces = board.whitePieces;
+            ownKing = board.blackKing;
+            ownPawns = board.blackPawns;
+            ownKnights = board.blackKnights;
+            ownBishops = board.blackBishops;
+            ownRooks = board.blackRooks;
+            ownQueens = board.blackQueens;
+
+        }
+
+        //Kingmoves
+        bitset<64> thisKingMoves;
+        for(int i = 0;i<64;i++){
+            if(ownKing[i]){
+                thisKingMoves = kingMoves[i];
+                thisKingMoves &= ~ownPieces;
+                while(thisKingMoves.any()){
+                    int targetSquare = thisKingMoves._Find_first();
+                    thisKingMoves.reset(targetSquare);
+                    chessMove* newMove = new chessMove;
+                    newMove->from.set(i);
+                    newMove->to.set(targetSquare);
+                    newMove->specialty = 0;
+                    pseudoLegalMoves.push_back(newMove);
+                }
+
+            }
+        }
+        //Pawnmoves
+
+
     };
+
 
     void generateLegalMoves(){
         //TODO
