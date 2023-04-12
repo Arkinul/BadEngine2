@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <chrono>
+#include "types.h"
 
 using namespace std;
 
@@ -251,6 +252,11 @@ class chessPosition{
             }
         }
         //Pawnmoves
+        bitset<64> thisPawnMoves;
+        bitset<64> thisPawnCaptures;
+
+
+
 
 
     };
