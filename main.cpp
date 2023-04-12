@@ -1,24 +1,13 @@
 #include <bits/stdc++.h>
 #include <chrono>
-#include "types.h"
+#include "bitboards.h"
+
 
 using namespace std;
 
 static const string startingFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-static vector<bitset<64>> kingMoves;
-static vector<bitset<64>> whitePawnMoves;
-static vector<bitset<64>> blackPawnMoves;
-static vector<bitset<64>> whitePawnCaptures;
-static vector<bitset<64>> blackPawnCaptures;
-static vector<bitset<64>> knightMoves;
-static vector<bitset<64>> bishopMoves;
-static vector<bitset<64>> rookMoves;
-static vector<bitset<64>> queenMoves;
 
-static vector<vector<char>> numSquaresToEdge(64,vector<char>(8));
-static const vector<char> dirOffsets = {8,-8,-1,1,7,-7,9,-9};
-static const vector<char> knightOffsets = {6,-10,15,-17,17,-15,10,-6};
 
 static const char KCastle = 1;
 static const char QCastle = 2;
@@ -38,35 +27,21 @@ static const int queenValue = 900;
 static const vector<int> pieceValues = {0,0,pawnValue,knightValue,bishopValue,rookValue,queenValue,0,
                                         0,0,pawnValue,knightValue,bishopValue,rookValue,queenValue,0,
                                         0,0,-pawnValue,-knightValue,-bishopValue,-rookValue,-queenValue,0};
-//precompute squares to edge from each square
-static void precomputeMoveData(){
-    for (char file = 0;file<8;file++){
-        for(char rank = 0;rank<8;rank++){
-            char numUp = 7-rank;
-            char numDown = rank;
-            char numLeft = file;
-            char numRight = 7-file;
 
-            char squareIndex = rank*8+file;
-
-            numSquaresToEdge[squareIndex] = {numUp,numDown,numLeft,numRight,min(numUp,numLeft),min(numDown,numRight),min(numUp,numRight),min(numDown,numLeft)};
-        }
-    }
-}
 //precompute possible moves for each piece from each square
 static void precomputeMoves(){
     for (char file = 0;file<8;file++){
         for(char rank = 0;rank<8;rank++){
             char squareIndex = rank*8+file;
-            bitset<64> squareKingMoves;
-            bitset<64> squareWhitePawnMoves;
-            bitset<64> squareBlackPawnMoves;
-            bitset<64> squareWhitePawnCaptures;
-            bitset<64> squareBlackPawnCaptures;
-            bitset<64> squareKnightMoves;
-            bitset<64> squareBishopMoves;
-            bitset<64> squareRookMoves;
-            bitset<64> squareQueenMoves;
+            Bitboard squareKingMoves;
+            Bitboard squareWhitePawnMoves;
+            Bitboard squareBlackPawnMoves;
+            Bitboard squareWhitePawnCaptures;
+            Bitboard squareBlackPawnCaptures;
+            Bitboard squareKnightMoves;
+            Bitboard squareBishopMoves;
+            Bitboard squareRookMoves;
+            Bitboard squareQueenMoves;
 
 
             char startDirIndex = 0;
@@ -163,27 +138,27 @@ static void precomputeMoves(){
 
 
 struct chessBoard {
-    bitset<64> whiteKing;
-    bitset<64> whitePawns;
-    bitset<64> whiteKnights;
-    bitset<64> whiteBishops;
-    bitset<64> whiteRooks;
-    bitset<64> whiteQueens;
-    bitset<64> blackKing;
-    bitset<64> blackPawns;
-    bitset<64> blackKnights;
-    bitset<64> blackBishops;
-    bitset<64> blackRooks;
-    bitset<64> blackQueens;
-    bitset<64> whitePieces;
-    bitset<64> blackPieces;
+    Bitboard whiteKing;
+    Bitboard whitePawns;
+    Bitboard whiteKnights;
+    Bitboard whiteBishops;
+    Bitboard whiteRooks;
+    Bitboard whiteQueens;
+    Bitboard blackKing;
+    Bitboard blackPawns;
+    Bitboard blackKnights;
+    Bitboard blackBishops;
+    Bitboard blackRooks;
+    Bitboard blackQueens;
+    Bitboard whitePieces;
+    Bitboard blackPieces;
 
 
 };
 
 struct chessMove{
-    bitset<64> from;
-    bitset<64> to;
+    Bitboard from;
+    Bitboard to;
     int specialty;
 
 
@@ -194,7 +169,7 @@ class chessPosition{
     bool whiteToMove;
 
     vector<bool> castlingRights;
-    bitset<64> enPassant;
+    Bitboard enPassant;
     int halfMoves;
     int fullMoves;
     vector<chessMove*> pseudoLegalMoves;
@@ -203,14 +178,14 @@ class chessPosition{
     int material;
 
     void generatePseudoLegalMoves(){
-        bitset<64> ownPieces;
-        bitset<64> enemyPieces;
-        bitset<64> ownKing;
-        bitset<64> ownPawns;
-        bitset<64> ownKnights;
-        bitset<64> ownBishops;
-        bitset<64> ownRooks;
-        bitset<64> ownQueens;
+        Bitboard ownPieces;
+        Bitboard enemyPieces;
+        Bitboard ownKing;
+        Bitboard ownPawns;
+        Bitboard ownKnights;
+        Bitboard ownBishops;
+        Bitboard ownRooks;
+        Bitboard ownQueens;
         if(whiteToMove){
             ownPieces = board.whitePieces;
             enemyPieces = board.blackPieces;
@@ -252,8 +227,7 @@ class chessPosition{
             }
         }
         //Pawnmoves
-        bitset<64> thisPawnMoves;
-        bitset<64> thisPawnCaptures;
+        ;
 
 
 
